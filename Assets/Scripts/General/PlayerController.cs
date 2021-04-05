@@ -1,25 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class PlayerController : MonoBehaviour {
     private void Update() {
         if(Input.GetMouseButtonDown(0)) {
-            Collider2D[] hits = Physics2D.OverlapPointAll(GetMousePos());
-            foreach (Collider2D hit in hits) {
-                if (hit != null) {
-                    Enemy enemy = hit.gameObject.GetComponent<Enemy>();
-                    if(enemy != null) {
-                        enemy.TakeDamage(1f);
+            if(!EventSystem.current.IsPointerOverGameObject()) {
+                BuildMenu.CloseMenu();
+                RaycastHit hit;
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+                if (Physics.Raycast(ray, out hit)) {
+                    TowerLocation towerLocation = hit.collider.gameObject.GetComponent<TowerLocation>();
+                    if (towerLocation != null) {
+                        towerLocation.OpenMenu();
                     }
                 }
             }
         }
-    }
-
-    private Vector3 GetMousePos() {
-        Vector3 pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        pos.z = 0;
-        return pos;
     }
 }

@@ -14,6 +14,8 @@ public class Resources : MonoBehaviour {
         } else {
             Destroy(instance.gameObject);
         }
+
+        AddCoins(100);
     }
 
     public static void AddCoins(int amount) {
@@ -22,7 +24,7 @@ public class Resources : MonoBehaviour {
     }
 
     public static bool SpendCoins(int amount) {
-        if(coins - amount > 0) {
+        if(coins - amount >= 0) {
             coins -= amount;
             instance.coinsText.text = "Coins: " + coins.ToString();
             return true;

@@ -10,8 +10,9 @@ public class Enemy : MonoBehaviour {
     public int coinWorth;
     public float maxHealth;
     public float speed = .25f;
+    public float waypointAccuracy = 1f;
     private int index = 0;
-    private Vector3 nextWaypoint;
+    private Waypoint nextWaypoint;
     private bool stop = false;
     private float health;
 
@@ -28,30 +29,31 @@ public class Enemy : MonoBehaviour {
 
     void Update() {
         if (!stop) {
-            if ((transform.position - myPathThroughLife[index + 1].transform.position).magnitude < .1f) {
+            if ((transform.position - myPathThroughLife[index + 1].transform.position).magnitude < waypointAccuracy) {
                 index = index + 1;
                 Recalculate();
             }
 
-            Vector3 moveThisFrame = nextWaypoint * Time.deltaTime * speed;
+            Vector3 moveThisFrame = (nextWaypoint.transform.position - transform.position).normalized * Time.deltaTime * speed;
             transform.Translate(moveThisFrame);
         }
 
     }
 
-    public void TakeDamage(float damage) {
+    public bool TakeDamage(float damage) {
         health -= damage;
         barControl.Set(health, maxHealth);
         if(health <= 0f) {
             Resources.AddCoins(coinWorth);
             Destroy(barControl.gameObject);
             Destroy(gameObject);
-        }
+            return true;
+        } return false;
     }
 
     void Recalculate() {
         if (index < myPathThroughLife.Length - 1) {
-            nextWaypoint = (myPathThroughLife[index + 1].transform.position - myPathThroughLife[index].transform.position).normalized;
+            nextWaypoint = myPathThroughLife[index + 1];
 
         } else { stop = true; }
     }
