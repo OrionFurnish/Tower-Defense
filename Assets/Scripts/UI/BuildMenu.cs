@@ -34,7 +34,7 @@ public class BuildMenu : MonoBehaviour {
     public void BuildTower() {
         if(selectedTower != null && selectedLocation != null) {
             // Spend Resources
-            if(Resources.SpendCoins(selectedTower.GetComponent<Tower>().goldCost)) {
+            if(GameManager.SpendCoins(selectedTower.GetComponent<Tower>().goldCost)) {
                 // Build
                 selectedLocation.BuildTower(selectedTower);
                 CloseMenu();

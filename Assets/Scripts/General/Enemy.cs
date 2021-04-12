@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
+using TMPro;
 
 public class Enemy : MonoBehaviour {
     [HideInInspector] public Path route;
@@ -11,6 +13,8 @@ public class Enemy : MonoBehaviour {
     public float maxHealth;
     public float speed = .25f;
     public float waypointAccuracy = 1f;
+    public UnityEvent deathEvent = new UnityEvent();
+    public GameObject textFloatPrefab;
     private int index = 0;
     private Waypoint nextWaypoint;
     private bool stop = false;
@@ -40,15 +44,14 @@ public class Enemy : MonoBehaviour {
 
     }
 
-    public bool TakeDamage(float damage) {
-        health -= damage;
-        barControl.Set(health, maxHealth);
-        if(health <= 0f) {
-            Resources.AddCoins(coinWorth);
-            Destroy(barControl.gameObject);
-            Destroy(gameObject);
-            return true;
-        } return false;
+    public void TakeDamage(float damage) {
+        if(health > 0f) {
+            health -= damage;
+            barControl.Set(health, maxHealth);
+            if (health <= 0f) {
+                Die();
+            }
+        }
     }
 
     void Recalculate() {
@@ -56,5 +59,25 @@ public class Enemy : MonoBehaviour {
             nextWaypoint = myPathThroughLife[index + 1];
 
         } else { stop = true; }
+    }
+
+    public void Die() {
+        GameManager.AddCoins(coinWorth);
+        GameObject obj = Instantiate(textFloatPrefab, barControl.transform.parent);
+        obj.transform.position = transform.position;
+        obj.GetComponent<TextMeshProUGUI>().text = "+" + coinWorth + " Gold";
+        GetComponent<AudioSource>().Play();
+        Remove();
+    }
+
+    public void Remove() {
+        Destroy(barControl.gameObject);
+        deathEvent.Invoke();
+        GetComponent<MeshRenderer>().enabled = false;
+        Invoke("DestroySelf", .3f);
+    }
+
+    private void DestroySelf() {
+        Destroy(gameObject);
     }
 }

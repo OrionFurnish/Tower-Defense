@@ -12,25 +12,25 @@ public class Tower : MonoBehaviour {
     public GameObject projectile;
     public float projectileSpd;
 
-    [HideInInspector] public List<Enemy> targets = new List<Enemy>();
+    public List<Enemy> targets = new List<Enemy>();
+    Enemy target;
 
     private void Awake() {
         GetComponentsInChildren<SphereCollider>()[1].radius = range;
         StartCoroutine(FireProjectiles());
     }
 
+    private void SelectTarget() {
+        if(targets.Count > 0) {
+            target = targets[0];
+            target.deathEvent.AddListener(delegate { SelectTarget(); });
+        }
+    }
+
     private IEnumerator FireProjectiles() {
         while(true) {
-            // Remove null targets
-            for(int i = 0; i < targets.Count; i++) {
-                if(targets[i] == null) {
-                    targets.RemoveAt(i);
-                    i--;
-                }
-            }
             if (targets.Count > 0) {
-                Enemy target = targets[0];
-                // Select furthest along enemy here
+                if(target == null) { SelectTarget(); }
                 Projectile curProjectile = Instantiate(projectile, transform.position, Quaternion.identity).GetComponent<Projectile>();
                 curProjectile.Initialize(target, projectileSpd, damage);
                 yield return new WaitForSeconds(reloadTime);
